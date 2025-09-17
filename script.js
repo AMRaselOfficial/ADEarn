@@ -3,14 +3,21 @@ import { auth, db } from "./firebase.js";
 import { 
   createUserWithEmailAndPassword, 
   signInWithEmailAndPassword, 
-  signOut 
+  signOut,
+  onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { 
   doc, setDoc, getDoc, getDocs, updateDoc, collection, query, where 
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+// Loading screen
+const loading = document.getElementById("loading");
+function showLoading() { loading.classList.remove("hidden"); }
+function hideLoading() { loading.classList.add("hidden"); }
+
 // --- Register ---
 async function register() {
+  showLoading();
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
   const referralCode = document.getElementById("referralCode").value;
@@ -19,10 +26,10 @@ async function register() {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const uid = userCredential.user.uid;
 
-    // Generate random referral code for new user
+    // Generate random referral code
     const myReferral = Math.random().toString(36).substring(2, 8).toUpperCase();
 
-    // Save new user in Firestore
+    // Save new user
     await setDoc(doc(db, "users", uid), {
       email: email,
       referralCode: myReferral,
@@ -31,8 +38,8 @@ async function register() {
       createdAt: new Date()
     });
 
+    // Reward friend $3 if referral code used
     if (referralCode) {
-      // Reward friend $3
       const q = query(collection(db, "users"), where("referralCode", "==", referralCode));
       const snap = await getDocs(q);
       if (!snap.empty) {
@@ -45,11 +52,14 @@ async function register() {
     alert("Registration successful!");
   } catch (error) {
     alert(error.message);
+  } finally {
+    hideLoading();
   }
 }
 
 // --- Login ---
 async function login() {
+  showLoading();
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
@@ -69,6 +79,8 @@ async function login() {
 
   } catch (error) {
     alert(error.message);
+  } finally {
+    hideLoading();
   }
 }
 
@@ -78,7 +90,26 @@ function logout() {
   location.reload();
 }
 
-// Make functions accessible from HTML buttons
+// --- Persistent Login ---
+onAuthStateChanged(auth, async (user) => {
+  if (user) {
+    const uid = user.uid;
+    const userDoc = await getDoc(doc(db, "users", uid));
+    const data = userDoc.data();
+
+    document.getElementById("auth-section").classList.add("hidden");
+    document.getElementById("dashboard").classList.remove("hidden");
+
+    document.getElementById("userEmail").innerText = data.email;
+    document.getElementById("myReferral").innerText = data.referralCode;
+    document.getElementById("balance").innerText = data.balance.toFixed(2);
+  } else {
+    document.getElementById("auth-section").classList.remove("hidden");
+    document.getElementById("dashboard").classList.add("hidden");
+  }
+});
+
+// Make functions accessible from HTML
 window.register = register;
 window.login = login;
 window.logout = logout;
