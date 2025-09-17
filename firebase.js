@@ -3,12 +3,12 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/fireba
 import { getAuth } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Your Firebase configuration
+// Your Firebase config
 const firebaseConfig = {
   apiKey: "AIzaSyD8an0WUr3uTlwshXH37oBVoM6pnc5ujNo",
   authDomain: "adearnrasel.firebaseapp.com",
   projectId: "adearnrasel",
-  storageBucket: "adearnrasel.appspot.com", // small fix: it should end with .appspot.com
+  storageBucket: "adearnrasel.appspot.com",
   messagingSenderId: "1037623431608",
   appId: "1:1037623431608:web:3063f44b7db7c03b133f4d",
   measurementId: "G-8MBXZM85JS"
@@ -19,5 +19,5 @@ const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
 const db = getFirestore(app);
 
-// Export so script.js can use
+// Export for script.js
 export { auth, db };

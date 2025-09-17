@@ -1,3 +1,4 @@
+// script.js
 import { auth, db } from "./firebase.js";
 import { 
   createUserWithEmailAndPassword, 
@@ -8,7 +9,7 @@ import {
   doc, setDoc, getDoc, getDocs, updateDoc, collection, query, where 
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// --- Register Function ---
+// --- Register ---
 async function register() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -18,20 +19,20 @@ async function register() {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const uid = userCredential.user.uid;
 
-    // Generate referral code
+    // Generate random referral code for new user
     const myReferral = Math.random().toString(36).substring(2, 8).toUpperCase();
 
-    // Save user
+    // Save new user in Firestore
     await setDoc(doc(db, "users", uid), {
       email: email,
       referralCode: myReferral,
       invitedBy: referralCode || null,
-      balance: referralCode ? 5 : 0,
+      balance: referralCode ? 5 : 0, // $5 for using friend's code
       createdAt: new Date()
     });
 
     if (referralCode) {
-      // Reward friend
+      // Reward friend $3
       const q = query(collection(db, "users"), where("referralCode", "==", referralCode));
       const snap = await getDocs(q);
       if (!snap.empty) {
@@ -47,7 +48,7 @@ async function register() {
   }
 }
 
-// --- Login Function ---
+// --- Login ---
 async function login() {
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
@@ -77,6 +78,7 @@ function logout() {
   location.reload();
 }
 
+// Make functions accessible from HTML buttons
 window.register = register;
 window.login = login;
 window.logout = logout;
