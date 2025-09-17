@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Earning Website</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+  <script defer src="firebase.js"></script>
+  <script defer src="script.js"></script>
+</head>
+<body>
+
+  <div class="container" id="auth-section">
+    <h2>Login / Register</h2>
+    <input type="email" id="email" placeholder="Email">
+    <input type="password" id="password" placeholder="Password">
+    <input type="text" id="referralCode" placeholder="Invitation Code (optional)">
+    <button onclick="register()">Register</button>
+    <button onclick="login()">Login</button>
+  </div>
+
+  <div class="container hidden" id="dashboard">
+    <h2>Welcome <span id="userEmail"></span></h2>
+    <p>Your Referral Code: <b id="myReferral"></b></p>
+    <p>Your Balance: $<span id="balance"></span></p>
+    <button onclick="logout()">Logout</button>
+  </div>
+
+</body>
+</html>
