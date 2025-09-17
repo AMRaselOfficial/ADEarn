@@ -13,7 +13,7 @@
     <h2>Login / Register</h2>
     <input type="email" id="email" placeholder="Email">
     <input type="password" id="password" placeholder="Password">
-    <input type="text" id="referralCode" placeholder="Invitation Code (optional)">
+    <input type="text" id="referralCode" placeholder="Friend's Referral Code (optional)">
     <button onclick="register()">Register</button>
     <button onclick="login()">Login</button>
   </div>
@@ -24,13 +24,6 @@
     <p>Your Referral Code: <b id="myReferral"></b></p>
     <p>Your Balance: $<span id="balance"></span></p>
     <button onclick="logout()">Logout</button>
-  </div>
-
-  <!-- LOADING OVERLAY -->
-  <div id="loading" class="hidden">
-    <div class="loading-box">
-      <p>Loading...</p>
-    </div>
   </div>
 
   <!-- Firebase Scripts -->

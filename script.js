@@ -10,14 +10,8 @@ import {
   doc, setDoc, getDoc, getDocs, updateDoc, collection, query, where 
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// Loading screen
-const loading = document.getElementById("loading");
-function showLoading() { loading.classList.remove("hidden"); }
-function hideLoading() { loading.classList.add("hidden"); }
-
 // --- Register ---
 async function register() {
-  showLoading();
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
   const referralCode = document.getElementById("referralCode").value;
@@ -25,7 +19,6 @@ async function register() {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const uid = userCredential.user.uid;
-
     const myReferral = Math.random().toString(36).substring(2, 8).toUpperCase();
 
     await setDoc(doc(db, "users", uid), {
@@ -49,14 +42,11 @@ async function register() {
     alert("Registration successful!");
   } catch (error) {
     alert(error.message);
-  } finally {
-    hideLoading();
   }
 }
 
 // --- Login ---
 async function login() {
-  showLoading();
   const email = document.getElementById("email").value;
   const password = document.getElementById("password").value;
 
@@ -76,8 +66,6 @@ async function login() {
 
   } catch (error) {
     alert(error.message);
-  } finally {
-    hideLoading();
   }
 }
 
@@ -101,7 +89,6 @@ onAuthStateChanged(auth, async (user) => {
     document.getElementById("myReferral").innerText = data.referralCode;
     document.getElementById("balance").innerText = data.balance.toFixed(2);
   }
-  hideLoading();
 });
 
 // Make functions accessible from HTML
