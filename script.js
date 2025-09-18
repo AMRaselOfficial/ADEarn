@@ -1,97 +1,126 @@
 // script.js
 import { auth, db } from "./firebase.js";
-import { 
-  createUserWithEmailAndPassword, 
-  signInWithEmailAndPassword, 
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
   signOut,
   onAuthStateChanged
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { 
-  doc, setDoc, getDoc, getDocs, updateDoc, collection, query, where 
+import {
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  increment,
+  collection,
+  query,
+  where,
+  getDocs,
+  onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// --- Register ---
-async function register() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-  const referralCode = document.getElementById("referralCode").value;
+const authSection = document.getElementById("auth-section");
+const dashboard = document.getElementById("dashboard");
+const userEmailEl = document.getElementById("userEmail");
+const myReferralEl = document.getElementById("myReferral");
+const balanceEl = document.getElementById("balance");
+
+// ------------------- Registration -------------------
+window.register = async function () {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const referralCode = document.getElementById("referralCode").value.trim();
+
+  if (!email || !password) {
+    alert("Please enter email and password");
+    return;
+  }
 
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-    const uid = userCredential.user.uid;
-    const myReferral = Math.random().toString(36).substring(2, 8).toUpperCase();
+    const user = userCredential.user;
 
-    await setDoc(doc(db, "users", uid), {
-      email: email,
-      referralCode: myReferral,
-      invitedBy: referralCode || null,
-      balance: referralCode ? 5 : 0,
-      createdAt: new Date()
-    });
+    // Generate random referral code for new user
+    const myCode = Math.random().toString(36).substring(2, 8).toUpperCase();
 
+    let userData = {
+      email: user.email,
+      balance: 0,
+      referralCode: myCode,
+      referredBy: null,
+      adsClaimed: {}
+    };
+
+    // Handle referral code
     if (referralCode) {
-      const q = query(collection(db, "users"), where("referralCode", "==", referralCode));
-      const snap = await getDocs(q);
-      if (!snap.empty) {
-        const friendDoc = snap.docs[0];
-        const newBalance = friendDoc.data().balance + 3;
-        await updateDoc(doc(db, "users", friendDoc.id), { balance: newBalance });
+      const refQuery = query(collection(db, "users"), where("referralCode", "==", referralCode));
+      const refSnap = await getDocs(refQuery);
+
+      if (!refSnap.empty) {
+        const refUser = refSnap.docs[0];
+        userData.referredBy = referralCode;
+
+        // Add referral bonuses
+        userData.balance += 5; // new user bonus
+        await updateDoc(doc(db, "users", refUser.id), { balance: increment(3) }); // inviter bonus
       }
     }
 
-    alert("Registration successful!");
+    // Save user to Firestore
+    await setDoc(doc(db, "users", user.uid), userData);
+    alert("Registered successfully!");
   } catch (error) {
     alert(error.message);
   }
-}
+};
 
-// --- Login ---
-async function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
+// ------------------- Login -------------------
+window.login = async function () {
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+
+  if (!email || !password) {
+    alert("Please enter email and password");
+    return;
+  }
 
   try {
-    const userCredential = await signInWithEmailAndPassword(auth, email, password);
-    const uid = userCredential.user.uid;
-
-    const userDoc = await getDoc(doc(db, "users", uid));
-    const data = userDoc.data();
-
-    document.getElementById("auth-section").classList.add("hidden");
-    document.getElementById("dashboard").classList.remove("hidden");
-
-    document.getElementById("userEmail").innerText = data.email;
-    document.getElementById("myReferral").innerText = data.referralCode;
-    document.getElementById("balance").innerText = data.balance.toFixed(2);
-
+    await signInWithEmailAndPassword(auth, email, password);
   } catch (error) {
     alert(error.message);
   }
-}
+};
 
-// --- Logout ---
-function logout() {
-  signOut(auth);
-  location.reload();
-}
+// ------------------- Logout -------------------
+window.logout = async function () {
+  await signOut(auth);
+};
 
-// --- Persistent Login ---
-onAuthStateChanged(auth, async (user) => {
+// ------------------- Ads Section Redirect -------------------
+window.goToAds = function () {
+  window.location.href = "ads.html";
+};
+
+// ------------------- Real-time Dashboard -------------------
+onAuthStateChanged(auth, (user) => {
   if (user) {
-    const uid = user.uid;
-    const userDoc = await getDoc(doc(db, "users", uid));
-    const data = userDoc.data();
+    // Show dashboard
+    authSection.classList.add("hidden");
+    dashboard.classList.remove("hidden");
 
-    document.getElementById("auth-section").classList.add("hidden");
-    document.getElementById("dashboard").classList.remove("hidden");
-
-    document.getElementById("userEmail").innerText = data.email;
-    document.getElementById("myReferral").innerText = data.referralCode;
-    document.getElementById("balance").innerText = data.balance.toFixed(2);
+    // Real-time listener for user document
+    const userDocRef = doc(db, "users", user.uid);
+    onSnapshot(userDocRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        userEmailEl.textContent = data.email;
+        myReferralEl.textContent = data.referralCode;
+        balanceEl.textContent = data.balance ?? 0;
+      }
+    });
+  } else {
+    // Show login/register
+    authSection.classList.remove("hidden");
+    dashboard.classList.add("hidden");
   }
 });
-
-// Make functions accessible from HTML
-window.register = register;
-window.login = login;
-window.logout = logout;
