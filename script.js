@@ -86,7 +86,7 @@ auth.onAuthStateChanged(async (user) => {
     authSection.classList.remove("hidden");
     dashboard.classList.add("hidden");
   }
-}
+});
 
 function requestWithdrawal() {
   const user = auth.currentUser;
