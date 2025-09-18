@@ -8,17 +8,15 @@
 </head>
 <body>
 
-  <!-- Message / Notification Container -->
-  <div id="message" class="message hidden"></div>
-
   <!-- LOGIN / REGISTER SECTION -->
   <div class="container" id="auth-section">
     <h2>Login / Register</h2>
     <input type="email" id="email" placeholder="Email">
     <input type="password" id="password" placeholder="Password">
-    <input type="text" id="referralCode" placeholder="Invitation Code (optional)">
+    <input type="text" id="referralCode" placeholder="Friend's Referral Code (optional)">
     <button onclick="register()">Register</button>
     <button onclick="login()">Login</button>
+    <p id="authMessage"></p>
   </div>
 
   <!-- DASHBOARD SECTION -->
@@ -26,22 +24,23 @@
     <h2>Welcome <span id="userEmail"></span></h2>
     <p>Your Referral Code: <b id="myReferral"></b></p>
     <p>Your Balance: $<span id="balance"></span></p>
-    
-    <!-- Withdrawal Section -->
-    <div class="container" id="withdraw-section">
-    <h3>Withdraw Balance</h3>
-    <p>Minimum withdrawal: $100</p>
-    <input type="number" id="withdrawAmount" placeholder="Enter amount to withdraw">
-    <button onclick="requestWithdrawal()">Withdraw</button>
-    <p id="withdrawMessage"></p>
-    </div>
-    
-    <button onclick="goToAds()">Go to Ads</button>
     <button onclick="logout()">Logout</button>
+
+    <!-- Withdrawal Section -->
+    <div class="withdraw-section">
+      <h3>Withdraw Balance</h3>
+      <p>Minimum withdrawal: $100</p>
+      <input type="number" id="withdrawAmount" placeholder="Enter amount to withdraw">
+      <button onclick="requestWithdrawal()">Withdraw</button>
+      <p id="withdrawMessage"></p>
+    </div>
   </div>
 
-  <!-- Firebase Scripts -->
-  <script type="module" src="firebase.js"></script>
-  <script type="module" src="script.js"></script>
+  <!-- Firebase & Script -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js"></script>
+  <script src="firebase.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
