@@ -3,7 +3,6 @@ body {
   background: #f4f4f4;
   margin: 0;
   padding: 20px;
-  min-height: 100vh;
   overflow-y: auto; /* enable vertical scroll */
 }
 
