@@ -8,12 +8,15 @@
 </head>
 <body>
 
+  <!-- Message / Notification Container -->
+  <div id="message" class="message hidden"></div>
+
   <!-- LOGIN / REGISTER SECTION -->
   <div class="container" id="auth-section">
     <h2>Login / Register</h2>
     <input type="email" id="email" placeholder="Email">
     <input type="password" id="password" placeholder="Password">
-    <input type="text" id="referralCode" placeholder="Friend's Referral Code (optional)">
+    <input type="text" id="referralCode" placeholder="Invitation Code (optional)">
     <button onclick="register()">Register</button>
     <button onclick="login()">Login</button>
   </div>
@@ -23,10 +26,7 @@
     <h2>Welcome <span id="userEmail"></span></h2>
     <p>Your Referral Code: <b id="myReferral"></b></p>
     <p>Your Balance: $<span id="balance"></span></p>
-
-    <!-- NEW: Ads Section Button -->
-    <button onclick="goToAds()">Go to Ads Section</button>
-
+    <button onclick="goToAds()">Go to Ads</button>
     <button onclick="logout()">Logout</button>
   </div>
 

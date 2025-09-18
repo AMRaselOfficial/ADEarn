@@ -11,15 +11,39 @@ const timerEl = document.getElementById("timer");
 const params = new URLSearchParams(window.location.search);
 const adId = params.get("ad");
 
-let seconds = 60;
+// Message system
+function showMessage(text, type = "success", duration = 3000) {
+  let messageEl = document.getElementById("message");
+  if (!messageEl) {
+    messageEl = document.createElement("div");
+    messageEl.id = "message";
+    messageEl.className = "message hidden";
+    document.body.appendChild(messageEl);
+  }
 
+  messageEl.textContent = text;
+
+  if (type === "error") messageEl.style.backgroundColor = "#f44336";
+  else if (type === "info") messageEl.style.backgroundColor = "#2196f3";
+  else messageEl.style.backgroundColor = "#4caf50";
+
+  messageEl.classList.remove("hidden");
+  messageEl.classList.add("show");
+
+  setTimeout(() => {
+    messageEl.classList.remove("show");
+    messageEl.classList.add("hidden");
+  }, duration);
+}
+
+// Auth check
 onAuthStateChanged(auth, async (user) => {
   if (!user) {
     window.location.href = "index.html";
     return;
   }
 
-  // Get ad data
+  // Fetch ad
   const adDoc = await getDoc(doc(db, "ads", adId));
   if (!adDoc.exists()) {
     adTitleEl.textContent = "Ad not found!";
@@ -28,9 +52,9 @@ onAuthStateChanged(auth, async (user) => {
 
   const adData = adDoc.data();
   adTitleEl.textContent = adData.title;
-  adFrame.src = adData.url; // your promotional ad link
+  adFrame.src = adData.url;
 
-  // Start timer
+  let seconds = 60;
   const interval = setInterval(async () => {
     seconds--;
     timerEl.textContent = seconds;
@@ -38,16 +62,13 @@ onAuthStateChanged(auth, async (user) => {
     if (seconds <= 0) {
       clearInterval(interval);
 
-      // Update user balance & mark ad as claimed
       await updateDoc(doc(db, "users", user.uid), {
         balance: increment(adData.reward),
         [`adsClaimed.${adId}`]: true
       });
 
-      alert(`You earned $${adData.reward}!`);
-      window.location.href = "ads.html"; // back to ads page
+      showMessage(`You earned $${adData.reward}!`, "success");
+      window.location.href = "ads.html";
     }
   }, 1000);
-
-  // If user leaves early (close tab / navigate), no reward automatically
 });

@@ -33,3 +33,29 @@ button {
 .hidden {
   display: none;
 }
+
+/* ----------------- Messages / Toast ----------------- */
+.message {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: #4caf50; /* success by default */
+  color: white;
+  padding: 12px 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 6px rgba(0,0,0,0.2);
+  z-index: 1000;
+  opacity: 0;
+  transform: translateY(-20px);
+  transition: opacity 0.5s, transform 0.5s;
+}
+
+.message.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.message.hidden {
+  opacity: 0;
+  transform: translateY(-20px);
+}

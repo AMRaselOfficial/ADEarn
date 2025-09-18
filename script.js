@@ -19,11 +19,37 @@ import {
   onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
+// ------------------- Elements -------------------
 const authSection = document.getElementById("auth-section");
 const dashboard = document.getElementById("dashboard");
 const userEmailEl = document.getElementById("userEmail");
 const myReferralEl = document.getElementById("myReferral");
 const balanceEl = document.getElementById("balance");
+
+// ------------------- Message System -------------------
+function showMessage(text, type = "success", duration = 3000) {
+  let messageEl = document.getElementById("message");
+  if (!messageEl) {
+    messageEl = document.createElement("div");
+    messageEl.id = "message";
+    messageEl.className = "message hidden";
+    document.body.appendChild(messageEl);
+  }
+
+  messageEl.textContent = text;
+
+  if (type === "error") messageEl.style.backgroundColor = "#f44336";
+  else if (type === "info") messageEl.style.backgroundColor = "#2196f3";
+  else messageEl.style.backgroundColor = "#4caf50";
+
+  messageEl.classList.remove("hidden");
+  messageEl.classList.add("show");
+
+  setTimeout(() => {
+    messageEl.classList.remove("show");
+    messageEl.classList.add("hidden");
+  }, duration);
+}
 
 // ------------------- Registration -------------------
 window.register = async function () {
@@ -32,7 +58,7 @@ window.register = async function () {
   const referralCode = document.getElementById("referralCode").value.trim();
 
   if (!email || !password) {
-    alert("Please enter email and password");
+    showMessage("Please enter email and password", "error");
     return;
   }
 
@@ -40,7 +66,6 @@ window.register = async function () {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    // Generate random referral code for new user
     const myCode = Math.random().toString(36).substring(2, 8).toUpperCase();
 
     let userData = {
@@ -51,7 +76,6 @@ window.register = async function () {
       adsClaimed: {}
     };
 
-    // Handle referral code
     if (referralCode) {
       const refQuery = query(collection(db, "users"), where("referralCode", "==", referralCode));
       const refSnap = await getDocs(refQuery);
@@ -60,17 +84,15 @@ window.register = async function () {
         const refUser = refSnap.docs[0];
         userData.referredBy = referralCode;
 
-        // Add referral bonuses
-        userData.balance += 5; // new user bonus
-        await updateDoc(doc(db, "users", refUser.id), { balance: increment(3) }); // inviter bonus
+        userData.balance += 5;
+        await updateDoc(doc(db, "users", refUser.id), { balance: increment(3) });
       }
     }
 
-    // Save user to Firestore
     await setDoc(doc(db, "users", user.uid), userData);
-    alert("Registered successfully!");
+    showMessage("Registered successfully!", "success");
   } catch (error) {
-    alert(error.message);
+    showMessage(error.message, "error");
   }
 };
 
@@ -80,14 +102,15 @@ window.login = async function () {
   const password = document.getElementById("password").value.trim();
 
   if (!email || !password) {
-    alert("Please enter email and password");
+    showMessage("Please enter email and password", "error");
     return;
   }
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
+    showMessage("Login successful!", "success");
   } catch (error) {
-    alert(error.message);
+    showMessage(error.message, "error");
   }
 };
 
@@ -104,11 +127,9 @@ window.goToAds = function () {
 // ------------------- Real-time Dashboard -------------------
 onAuthStateChanged(auth, (user) => {
   if (user) {
-    // Show dashboard
     authSection.classList.add("hidden");
     dashboard.classList.remove("hidden");
 
-    // Real-time listener for user document
     const userDocRef = doc(db, "users", user.uid);
     onSnapshot(userDocRef, (docSnap) => {
       if (docSnap.exists()) {
@@ -119,7 +140,6 @@ onAuthStateChanged(auth, (user) => {
       }
     });
   } else {
-    // Show login/register
     authSection.classList.remove("hidden");
     dashboard.classList.add("hidden");
   }
