@@ -1,13 +1,11 @@
 // script.js
 
-// ---------------- Helper ----------------
 function showMessage(el, text, color="red") {
   el.textContent = text;
   el.style.color = color;
   setTimeout(()=>el.textContent="", 3000);
 }
 
-// ---------------- Registration ----------------
 function register() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -19,7 +17,7 @@ function register() {
     return;
   }
 
-  firebase.auth().createUserWithEmailAndPassword(email, password)
+  auth.createUserWithEmailAndPassword(email, password)
     .then(async (userCredential) => {
       const user = userCredential.user;
       const myReferral = Math.random().toString(36).substring(2,8).toUpperCase();
@@ -33,8 +31,7 @@ function register() {
       };
 
       if (referralCodeInput) {
-        // Check if referral exists
-        const usersRef = firebase.firestore().collection("users");
+        const usersRef = db.collection("users");
         const query = await usersRef.where("referralCode","==",referralCodeInput).get();
         if (!query.empty) {
           const refUid = query.docs[0].id;
@@ -46,12 +43,11 @@ function register() {
         }
       }
 
-      await firebase.firestore().collection("users").doc(user.uid).set(userData);
+      await db.collection("users").doc(user.uid).set(userData);
     })
     .catch(err => showMessage(authMessageEl, err.message));
 }
 
-// ---------------- Login ----------------
 function login() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
@@ -62,17 +58,15 @@ function login() {
     return;
   }
 
-  firebase.auth().signInWithEmailAndPassword(email, password)
+  auth.signInWithEmailAndPassword(email, password)
     .catch(err => showMessage(authMessageEl, err.message));
 }
 
-// ---------------- Logout ----------------
 function logout() {
-  firebase.auth().signOut();
+  auth.signOut();
 }
 
-// ---------------- Auth State ----------------
-firebase.auth().onAuthStateChanged(async (user) => {
+auth.onAuthStateChanged(async (user) => {
   const authSection = document.getElementById("auth-section");
   const dashboard = document.getElementById("dashboard");
   const userEmailEl = document.getElementById("userEmail");
@@ -83,7 +77,7 @@ firebase.auth().onAuthStateChanged(async (user) => {
     authSection.classList.add("hidden");
     dashboard.classList.remove("hidden");
 
-    const userDoc = await firebase.firestore().collection("users").doc(user.uid).get();
+    const userDoc = await db.collection("users").doc(user.uid).get();
     const data = userDoc.data();
     userEmailEl.textContent = data.email;
     myReferralEl.textContent = data.referralCode;
@@ -92,11 +86,10 @@ firebase.auth().onAuthStateChanged(async (user) => {
     authSection.classList.remove("hidden");
     dashboard.classList.add("hidden");
   }
-});
+}
 
-// ---------------- Withdrawal ----------------
 function requestWithdrawal() {
-  const user = firebase.auth().currentUser;
+  const user = auth.currentUser;
   const amount = parseFloat(document.getElementById("withdrawAmount").value);
   const messageEl = document.getElementById("withdrawMessage");
 
@@ -110,7 +103,7 @@ function requestWithdrawal() {
     return;
   }
 
-  const userRef = firebase.firestore().collection("users").doc(user.uid);
+  const userRef = db.collection("users").doc(user.uid);
   userRef.get().then(async (docSnap) => {
     const data = docSnap.data();
     if (data.balance < amount) {
@@ -122,8 +115,7 @@ function requestWithdrawal() {
       balance: data.balance - amount
     });
 
-    // Create withdrawal request
-    await firebase.firestore().collection("withdrawals").add({
+    await db.collection("withdrawals").add({
       userId: user.uid,
       email: user.email,
       amount: amount,
