@@ -56,11 +56,16 @@ onAuthStateChanged(auth, async (user) => {
   adTitleEl.textContent = adData.title;
   adFrame.src = adData.url;
 
-  // Check if user already claimed this ad
+  // Fetch user document
   const userDoc = await getDoc(doc(db, "users", user.uid));
   const userData = userDoc.data();
-  if (userData.adsClaimed && userData.adsClaimed[adId]) {
-    showMessage("You already claimed this ad.", "info");
+
+  // Check daily ad claim
+  const today = new Date().toISOString().split("T")[0]; // YYYY-MM-DD
+  const lastClaimed = userData.adsClaimed?.[adId] ?? null;
+
+  if (lastClaimed === today) {
+    showMessage("You already claimed this ad today. Come back after 12:00 AM!", "info");
     timerEl.textContent = "0";
     return;
   }
@@ -76,10 +81,10 @@ onAuthStateChanged(auth, async (user) => {
     if (seconds <= 0) {
       clearInterval(interval);
 
-      // Update user balance and mark ad as claimed
+      // Update user balance and mark ad as claimed today
       await updateDoc(doc(db, "users", user.uid), {
         balance: increment(adData.reward),
-        [`adsClaimed.${adId}`]: true
+        [`adsClaimed.${adId}`]: today
       });
 
       showMessage(`You earned $${adData.reward}!`, "success");
@@ -88,13 +93,4 @@ onAuthStateChanged(auth, async (user) => {
       window.location.href = "ads.html";
     }
   }, 1000);
-
-  // Optional: detect if user tries to leave early (optional)
-  window.addEventListener("beforeunload", (e) => {
-    if (seconds > 0) {
-      showMessage("You must wait 60 seconds to earn the reward.", "info");
-      e.preventDefault();
-      e.returnValue = "";
-    }
-  });
 });
