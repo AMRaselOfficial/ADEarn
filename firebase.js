@@ -1,4 +1,3 @@
-// firebase.js
 const firebaseConfig = {
   apiKey: "AIzaSyD8an0WUr3uTlwshXH37oBVoM6pnc5ujNo",
   authDomain: "adearnrasel.firebaseapp.com",
@@ -9,9 +8,8 @@ const firebaseConfig = {
   measurementId: "G-8MBXZM85JS"
 };
 
-// Initialize Firebase (compat version)
+// Initialize Firebase
 firebase.initializeApp(firebaseConfig);
 
-// Now firebase is global
 const auth = firebase.auth();
 const db = firebase.firestore();

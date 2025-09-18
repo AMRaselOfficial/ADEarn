@@ -24,28 +24,32 @@
     <h2>Welcome <span id="userEmail"></span></h2>
     <p>Your Referral Code: <b id="myReferral"></b></p>
     <p>Your Balance: $<span id="balance"></span></p>
-    <button onclick="logout()">Logout</button>
+
+    <!-- Ads Section -->
+    <h3>Watch Ads</h3>
+    <button onclick="goToAd('ad1')">Watch Ad 1</button>
+    <button onclick="goToAd('ad2')">Watch Ad 2</button>
+    <p id="adMessage"></p>
 
     <!-- Withdrawal Section -->
-    <div class="withdraw-section">
-      <h3>Withdraw Balance</h3>
-      <p>Minimum withdrawal: $100</p>
-      <input type="number" id="withdrawAmount" placeholder="Enter amount to withdraw">
-      <button onclick="requestWithdrawal()">Withdraw</button>
-      <p id="withdrawMessage"></p>
-    </div>
+    <h3>Withdraw Balance</h3>
+    <p>Minimum withdrawal: $100</p>
+    <input type="number" id="withdrawAmount" placeholder="Enter amount to withdraw">
+    <button onclick="requestWithdrawal()">Withdraw</button>
+    <p id="withdrawMessage"></p>
+
+    <button onclick="logout()">Logout</button>
   </div>
 
-  <!-- Firebase v9 compat SDK (namespaced, global firebase) -->
+  <!-- Firebase v9 compat SDK -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-  <!-- Your Firebase config -->
+  <!-- Firebase config -->
   <script src="firebase.js"></script>
 
-  <!-- Your custom script -->
+  <!-- Custom script -->
   <script src="script.js"></script>
-
 </body>
 </html>

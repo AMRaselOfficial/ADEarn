@@ -1,12 +1,12 @@
-// script.js
-
+// Helper to show messages
 function showMessage(el, text, color="red") {
   el.textContent = text;
   el.style.color = color;
   setTimeout(()=>el.textContent="", 3000);
 }
 
-function register() {
+// Register
+window.register = async function() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
   const referralCodeInput = document.getElementById("referralCode").value.trim().toUpperCase();
@@ -17,38 +17,41 @@ function register() {
     return;
   }
 
-  auth.createUserWithEmailAndPassword(email, password)
-    .then(async (userCredential) => {
-      const user = userCredential.user;
-      const myReferral = Math.random().toString(36).substring(2,8).toUpperCase();
+  try {
+    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    const user = userCredential.user;
+    const myReferral = Math.random().toString(36).substring(2,8).toUpperCase();
 
-      let userData = {
-        email: email,
-        balance: 0,
-        referralCode: myReferral,
-        referredBy: null,
-        adsClaimed: {}
-      };
+    let userData = {
+      email: email,
+      balance: 0,
+      referralCode: myReferral,
+      referredBy: null,
+      adsClaimed: {}
+    };
 
-      if (referralCodeInput) {
-        const usersRef = db.collection("users");
-        const query = await usersRef.where("referralCode","==",referralCodeInput).get();
-        if (!query.empty) {
-          const refUid = query.docs[0].id;
-          await usersRef.doc(refUid).update({
-            balance: firebase.firestore.FieldValue.increment(3)
-          });
-          userData.balance = 5;
-          userData.referredBy = referralCodeInput;
-        }
+    if (referralCodeInput) {
+      const usersRef = db.collection("users");
+      const query = await usersRef.where("referralCode","==",referralCodeInput).get();
+      if (!query.empty) {
+        const refUid = query.docs[0].id;
+        await usersRef.doc(refUid).update({
+          balance: firebase.firestore.FieldValue.increment(3)
+        });
+        userData.balance = 5;
+        userData.referredBy = referralCodeInput;
       }
+    }
 
-      await db.collection("users").doc(user.uid).set(userData);
-    })
-    .catch(err => showMessage(authMessageEl, err.message));
-}
+    await db.collection("users").doc(user.uid).set(userData);
 
-function login() {
+  } catch(err) {
+    showMessage(authMessageEl, err.message);
+  }
+};
+
+// Login
+window.login = async function() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
   const authMessageEl = document.getElementById("authMessage");
@@ -58,14 +61,19 @@ function login() {
     return;
   }
 
-  auth.signInWithEmailAndPassword(email, password)
-    .catch(err => showMessage(authMessageEl, err.message));
-}
+  try {
+    await auth.signInWithEmailAndPassword(email, password);
+  } catch(err) {
+    showMessage(authMessageEl, err.message);
+  }
+};
 
-function logout() {
+// Logout
+window.logout = function() {
   auth.signOut();
-}
+};
 
+// Auth state
 auth.onAuthStateChanged(async (user) => {
   const authSection = document.getElementById("auth-section");
   const dashboard = document.getElementById("dashboard");
@@ -88,7 +96,8 @@ auth.onAuthStateChanged(async (user) => {
   }
 });
 
-function requestWithdrawal() {
+// Withdraw
+window.requestWithdrawal = async function() {
   const user = auth.currentUser;
   const amount = parseFloat(document.getElementById("withdrawAmount").value);
   const messageEl = document.getElementById("withdrawMessage");
@@ -104,25 +113,55 @@ function requestWithdrawal() {
   }
 
   const userRef = db.collection("users").doc(user.uid);
-  userRef.get().then(async (docSnap) => {
-    const data = docSnap.data();
-    if (data.balance < amount) {
-      showMessage(messageEl, "Insufficient balance!");
-      return;
-    }
+  const docSnap = await userRef.get();
+  const data = docSnap.data();
 
-    await userRef.update({
-      balance: data.balance - amount
-    });
+  if (data.balance < amount) {
+    showMessage(messageEl, "Insufficient balance!");
+    return;
+  }
 
-    await db.collection("withdrawals").add({
-      userId: user.uid,
-      email: user.email,
-      amount: amount,
-      status: "pending",
-      date: firebase.firestore.FieldValue.serverTimestamp()
-    });
+  await userRef.update({ balance: data.balance - amount });
 
-    showMessage(messageEl, `Withdrawal request of $${amount} submitted!`, "green");
+  await db.collection("withdrawals").add({
+    userId: user.uid,
+    email: user.email,
+    amount: amount,
+    status: "pending",
+    date: firebase.firestore.FieldValue.serverTimestamp()
   });
-}
+
+  showMessage(messageEl, `Withdrawal request of $${amount} submitted!`, "green");
+};
+
+// Watch Ad
+window.goToAd = async function(adId) {
+  const user = auth.currentUser;
+  const adMessageEl = document.getElementById("adMessage");
+  if (!user) {
+    showMessage(adMessageEl, "Login first!");
+    return;
+  }
+
+  const userRef = db.collection("users").doc(user.uid);
+  const userDoc = await userRef.get();
+  const data = userDoc.data();
+
+  // Check daily claim
+  const today = new Date().toDateString();
+  if (data.adsClaimed && data.adsClaimed[adId] === today) {
+    showMessage(adMessageEl, "You already claimed this ad today.");
+    return;
+  }
+
+  // Show ad page (simple example, wait 60s)
+  showMessage(adMessageEl, "Ad started, wait 60s...", "green");
+
+  setTimeout(async () => {
+    await userRef.update({
+      [`adsClaimed.${adId}`]: today,
+      balance: firebase.firestore.FieldValue.increment(1) // reward $1 for example
+    });
+    showMessage(adMessageEl, "Ad claimed! +$1", "green");
+  }, 60000);
+};
