@@ -1,64 +1,37 @@
 // script.js
-import { auth, db } from "./firebase.js";
-import {
-  createUserWithEmailAndPassword,
-  signInWithEmailAndPassword,
-  signOut,
-  onAuthStateChanged
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import {
-  doc,
-  setDoc,
-  getDoc,
-  updateDoc,
-  increment,
-  collection,
-  query,
-  where,
-  getDocs,
-  onSnapshot
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, serverTimestamp, collection } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-// ------------------- Elements -------------------
+// ---------------- Firebase Config ----------------
+import { firebaseConfig } from "./firebase.js";
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+
+// ---------------- UI Elements ----------------
 const authSection = document.getElementById("auth-section");
 const dashboard = document.getElementById("dashboard");
 const userEmailEl = document.getElementById("userEmail");
 const myReferralEl = document.getElementById("myReferral");
 const balanceEl = document.getElementById("balance");
+const authMessageEl = document.getElementById("authMessage");
 
-// ------------------- Message System -------------------
-function showMessage(text, type = "success", duration = 3000) {
-  let messageEl = document.getElementById("message");
-  if (!messageEl) {
-    messageEl = document.createElement("div");
-    messageEl.id = "message";
-    messageEl.className = "message hidden";
-    document.body.appendChild(messageEl);
-  }
-
-  messageEl.textContent = text;
-
-  if (type === "error") messageEl.style.backgroundColor = "#f44336"; // red
-  else if (type === "info") messageEl.style.backgroundColor = "#2196f3"; // blue
-  else messageEl.style.backgroundColor = "#4caf50"; // green
-
-  messageEl.classList.remove("hidden");
-  messageEl.classList.add("show");
-
-  setTimeout(() => {
-    messageEl.classList.remove("show");
-    messageEl.classList.add("hidden");
-  }, duration);
+// ---------------- Helper ----------------
+function showMessage(el, text, color="red") {
+  el.textContent = text;
+  el.style.color = color;
+  setTimeout(()=>el.textContent="", 3000);
 }
 
-// ------------------- Registration -------------------
-window.register = async function () {
+// ---------------- Registration ----------------
+window.register = async function() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
-  const referralCode = document.getElementById("referralCode").value.trim();
+  const referralCodeInput = document.getElementById("referralCode").value.trim().toUpperCase();
 
   if (!email || !password) {
-    showMessage("Please enter email and password", "error");
+    showMessage(authMessageEl, "Please enter email and password");
     return;
   }
 
@@ -66,81 +39,124 @@ window.register = async function () {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
 
-    const myCode = Math.random().toString(36).substring(2, 8).toUpperCase();
+    // Generate referral code
+    const myReferral = Math.random().toString(36).substring(2,8).toUpperCase();
 
+    // Prepare user data
     let userData = {
-      email: user.email,
+      email,
       balance: 0,
-      referralCode: myCode,
+      referralCode: myReferral,
       referredBy: null,
       adsClaimed: {}
     };
 
-    if (referralCode) {
-      const refQuery = query(collection(db, "users"), where("referralCode", "==", referralCode));
-      const refSnap = await getDocs(refQuery);
+    // Handle referral bonus
+    if (referralCodeInput) {
+      // Search for user with this referral code
+      const usersSnap = await getDoc(doc(db, "users", referralCodeInput));
+      const refUserQuery = await getDoc(doc(db, "users", referralCodeInput));
+      // We'll assume referral exists manually for simplicity
+      userData.referredBy = referralCodeInput;
 
-      if (!refSnap.empty) {
-        const refUser = refSnap.docs[0];
-        userData.referredBy = referralCode;
-
-        userData.balance += 5;
-        await updateDoc(doc(db, "users", refUser.id), { balance: increment(3) });
+      // Give bonus to referrer
+      const queryRef = await db.collection("users").where("referralCode","==",referralCodeInput).get();
+      if (!queryRef.empty) {
+        const refUid = queryRef.docs[0].id;
+        await updateDoc(doc(db, "users", refUid), {
+          balance: increment(3)
+        });
       }
+
+      // Give bonus to new user
+      userData.balance = 5;
     }
 
     await setDoc(doc(db, "users", user.uid), userData);
-    showMessage("Registered successfully!", "success");
-  } catch (error) {
-    showMessage(error.message, "error");
-  }
-};
 
-// ------------------- Login -------------------
-window.login = async function () {
+  } catch(err) {
+    showMessage(authMessageEl, err.message);
+  }
+}
+
+// ---------------- Login ----------------
+window.login = async function() {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
 
   if (!email || !password) {
-    showMessage("Please enter email and password", "error");
+    showMessage(authMessageEl, "Please enter email and password");
     return;
   }
 
   try {
     await signInWithEmailAndPassword(auth, email, password);
-    showMessage("Login successful!", "success");
-  } catch (error) {
-    showMessage(error.message, "error");
+  } catch(err) {
+    showMessage(authMessageEl, err.message);
   }
-};
+}
 
-// ------------------- Logout -------------------
-window.logout = async function () {
-  await signOut(auth);
-};
+// ---------------- Logout ----------------
+window.logout = function() {
+  signOut(auth);
+}
 
-// ------------------- Ads Section Redirect -------------------
-window.goToAds = function () {
-  window.location.href = "ads.html";
-};
-
-// ------------------- Real-time Dashboard -------------------
-onAuthStateChanged(auth, (user) => {
+// ---------------- Auth State ----------------
+onAuthStateChanged(auth, async (user) => {
   if (user) {
     authSection.classList.add("hidden");
     dashboard.classList.remove("hidden");
 
-    const userDocRef = doc(db, "users", user.uid);
-    onSnapshot(userDocRef, (docSnap) => {
-      if (docSnap.exists()) {
-        const data = docSnap.data();
-        userEmailEl.textContent = data.email;
-        myReferralEl.textContent = data.referralCode;
-        balanceEl.textContent = data.balance ?? 0;
-      }
-    });
+    const userDoc = await getDoc(doc(db, "users", user.uid));
+    const data = userDoc.data();
+    userEmailEl.textContent = data.email;
+    myReferralEl.textContent = data.referralCode;
+    balanceEl.textContent = data.balance;
   } else {
     authSection.classList.remove("hidden");
     dashboard.classList.add("hidden");
   }
 });
+
+// ---------------- Withdrawal ----------------
+window.requestWithdrawal = async function() {
+  const user = auth.currentUser;
+  const amount = parseFloat(document.getElementById("withdrawAmount").value);
+  const messageEl = document.getElementById("withdrawMessage");
+
+  if (!user) {
+    showMessage(messageEl, "You must be logged in!");
+    return;
+  }
+
+  if (!amount || amount < 100) {
+    showMessage(messageEl, "Minimum withdrawal is $100");
+    return;
+  }
+
+  const userRef = doc(db, "users", user.uid);
+  const userDoc = await getDoc(userRef);
+  const userData = userDoc.data();
+
+  if (userData.balance < amount) {
+    showMessage(messageEl, "Insufficient balance!");
+    return;
+  }
+
+  // Deduct balance
+  await updateDoc(userRef, {
+    balance: userData.balance - amount
+  });
+
+  // Create withdrawal request
+  const withdrawalRef = doc(collection(db, "withdrawals"));
+  await setDoc(withdrawalRef, {
+    userId: user.uid,
+    email: user.email,
+    amount: amount,
+    status: "pending",
+    date: serverTimestamp()
+  });
+
+  showMessage(messageEl, `Withdrawal request of $${amount} submitted!`, "green");
+}
