@@ -7,15 +7,28 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="container">
-    <h2 id="adTitle">Loading Ad...</h2>
-    <p>Wait <span id="timer">60</span> seconds to earn your reward.</p>
-    <div id="adContent">
-      <!-- Place your ad here -->
-      <iframe id="adFrame" src="" width="300" height="250"></iframe>
+
+  <h2 id="adTitle">Ad Title</h2>
+
+  <!-- Banner Section -->
+  <div id="adBannerContainer">
+    <!-- Example banners -->
+    <div class="banner">
+      <img src="banner1.jpg" alt="Promo 1">
+      <p>Check out our latest offer!</p>
     </div>
+    <div class="banner">
+      <img src="banner2.jpg" alt="Promo 2">
+      <p>Special discount today!</p>
+    </div>
+    <!-- You can add more banners here -->
   </div>
 
+  <p>Time remaining: <span id="timer">60</span> seconds</p>
+
+  <div id="message" class="message hidden"></div>
+
+  <script type="module" src="firebase.js"></script>
   <script type="module" src="watch.js"></script>
 </body>
 </html>

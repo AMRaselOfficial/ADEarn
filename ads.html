@@ -3,32 +3,17 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Watch Ad</title>
+  <title>Ads Section</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-  <h2 id="adTitle">Ad Title</h2>
-
-  <!-- Banner Section -->
-  <div id="adBannerContainer">
-    <!-- Example banners -->
-    <div class="banner">
-      <img src="banner1.jpg" alt="Promo 1">
-      <p>Check out our latest offer!</p>
-    </div>
-    <div class="banner">
-      <img src="banner2.jpg" alt="Promo 2">
-      <p>Special discount today!</p>
-    </div>
-    <!-- You can add more banners here -->
+  <div class="container">
+    <h2>Available Ads</h2>
+    <p>Your Balance: $<span id="balance">0</span></p>
+    <div id="adsList"></div>
+    <button onclick="goBack()">Back to Dashboard</button>
   </div>
 
-  <p>Time remaining: <span id="timer">60</span> seconds</p>
-
-  <div id="message" class="message hidden"></div>
-
-  <script type="module" src="firebase.js"></script>
-  <script type="module" src="watch.js"></script>
+  <script type="module" src="ads.js"></script>
 </body>
 </html>
