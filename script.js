@@ -1,13 +1,7 @@
 // script.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
-import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc, updateDoc, increment, serverTimestamp, collection } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
-
-// ---------------- Firebase Config ----------------
-import { firebaseConfig } from "./firebase.js";
-const app = initializeApp(firebaseConfig);
-const auth = getAuth(app);
-const db = getFirestore(app);
+import { auth, db, initializeFirebase } from "./firebase.js";
+import { createUserWithEmailAndPassword, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { doc, setDoc, getDoc, updateDoc, increment, collection, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 // ---------------- UI Elements ----------------
 const authSection = document.getElementById("auth-section");
@@ -42,7 +36,6 @@ window.register = async function() {
     // Generate referral code
     const myReferral = Math.random().toString(36).substring(2,8).toUpperCase();
 
-    // Prepare user data
     let userData = {
       email,
       balance: 0,
@@ -53,12 +46,9 @@ window.register = async function() {
 
     // Handle referral bonus
     if (referralCodeInput) {
-      // Search for user with this referral code
-      const usersSnap = await getDoc(doc(db, "users", referralCodeInput));
-      const refUserQuery = await getDoc(doc(db, "users", referralCodeInput));
-      // We'll assume referral exists manually for simplicity
+      const usersSnapshot = await getDoc(doc(db, "users", referralCodeInput));
       userData.referredBy = referralCodeInput;
-
+      // For simplicity, we'll assume the referral code exists in the database
       // Give bonus to referrer
       const queryRef = await db.collection("users").where("referralCode","==",referralCodeInput).get();
       if (!queryRef.empty) {
@@ -67,7 +57,6 @@ window.register = async function() {
           balance: increment(3)
         });
       }
-
       // Give bonus to new user
       userData.balance = 5;
     }
