@@ -1,127 +1,146 @@
-// Helper to show messages
-function showMessage(el, text, color="red") {
-  el.textContent = text;
-  el.style.color = color;
-  setTimeout(()=>el.textContent="", 3000);
+// script.js
+import { auth, db } from "./firebase.js";
+import {
+  createUserWithEmailAndPassword,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import {
+  doc,
+  setDoc,
+  getDoc,
+  updateDoc,
+  increment,
+  collection,
+  query,
+  where,
+  getDocs,
+  onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+// ------------------- Elements -------------------
+const authSection = document.getElementById("auth-section");
+const dashboard = document.getElementById("dashboard");
+const userEmailEl = document.getElementById("userEmail");
+const myReferralEl = document.getElementById("myReferral");
+const balanceEl = document.getElementById("balance");
+
+// ------------------- Message System -------------------
+function showMessage(text, type = "success", duration = 3000) {
+  let messageEl = document.getElementById("message");
+  if (!messageEl) {
+    messageEl = document.createElement("div");
+    messageEl.id = "message";
+    messageEl.className = "message hidden";
+    document.body.appendChild(messageEl);
+  }
+
+  messageEl.textContent = text;
+
+  if (type === "error") messageEl.style.backgroundColor = "#f44336"; // red
+  else if (type === "info") messageEl.style.backgroundColor = "#2196f3"; // blue
+  else messageEl.style.backgroundColor = "#4caf50"; // green
+
+  messageEl.classList.remove("hidden");
+  messageEl.classList.add("show");
+
+  setTimeout(() => {
+    messageEl.classList.remove("show");
+    messageEl.classList.add("hidden");
+  }, duration);
 }
 
-// Register
-window.register = async function() {
+// ------------------- Registration -------------------
+window.register = async function () {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
-  const referralCodeInput = document.getElementById("referralCode").value.trim().toUpperCase();
-  const authMessageEl = document.getElementById("authMessage");
+  const referralCode = document.getElementById("referralCode").value.trim();
 
   if (!email || !password) {
-    showMessage(authMessageEl, "Please enter email and password");
+    showMessage("Please enter email and password", "error");
     return;
   }
 
   try {
-    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
-    const myReferral = Math.random().toString(36).substring(2,8).toUpperCase();
+
+    const myCode = Math.random().toString(36).substring(2, 8).toUpperCase();
 
     let userData = {
-      email: email,
+      email: user.email,
       balance: 0,
-      referralCode: myReferral,
+      referralCode: myCode,
       referredBy: null,
       adsClaimed: {}
     };
 
-    if (referralCodeInput) {
-      const usersRef = db.collection("users");
-      const query = await usersRef.where("referralCode","==",referralCodeInput).get();
-      if (!query.empty) {
-        const refUid = query.docs[0].id;
-        await usersRef.doc(refUid).update({
-          balance: firebase.firestore.FieldValue.increment(3)
-        });
-        userData.balance = 5;
-        userData.referredBy = referralCodeInput;
+    if (referralCode) {
+      const refQuery = query(collection(db, "users"), where("referralCode", "==", referralCode));
+      const refSnap = await getDocs(refQuery);
+
+      if (!refSnap.empty) {
+        const refUser = refSnap.docs[0];
+        userData.referredBy = referralCode;
+
+        userData.balance += 5;
+        await updateDoc(doc(db, "users", refUser.id), { balance: increment(3) });
       }
     }
 
-    await db.collection("users").doc(user.uid).set(userData);
-
-  } catch(err) {
-    showMessage(authMessageEl, err.message);
+    await setDoc(doc(db, "users", user.uid), userData);
+    showMessage("Registered successfully!", "success");
+  } catch (error) {
+    showMessage(error.message, "error");
   }
 };
 
-// Login
-window.login = async function() {
+// ------------------- Login -------------------
+window.login = async function () {
   const email = document.getElementById("email").value.trim();
   const password = document.getElementById("password").value.trim();
-  const authMessageEl = document.getElementById("authMessage");
 
   if (!email || !password) {
-    showMessage(authMessageEl, "Please enter email and password");
+    showMessage("Please enter email and password", "error");
     return;
   }
 
   try {
-    await auth.signInWithEmailAndPassword(email, password);
-  } catch(err) {
-    showMessage(authMessageEl, err.message);
+    await signInWithEmailAndPassword(auth, email, password);
+    showMessage("Login successful!", "success");
+  } catch (error) {
+    showMessage(error.message, "error");
   }
 };
 
-// Logout
-window.logout = function() {
-  auth.signOut();
+// ------------------- Logout -------------------
+window.logout = async function () {
+  await signOut(auth);
 };
 
-// Auth state
-auth.onAuthStateChanged(async (user) => {
-  const authSection = document.getElementById("auth-section");
-  const dashboard = document.getElementById("dashboard");
-  const userEmailEl = document.getElementById("userEmail");
-  const myReferralEl = document.getElementById("myReferral");
-  const balanceEl = document.getElementById("balance");
+// ------------------- Ads Section Redirect -------------------
+window.goToAds = function () {
+  window.location.href = "ads.html";
+};
 
+// ------------------- Real-time Dashboard -------------------
+onAuthStateChanged(auth, (user) => {
   if (user) {
     authSection.classList.add("hidden");
     dashboard.classList.remove("hidden");
 
-    const userDoc = await db.collection("users").doc(user.uid).get();
-    const data = userDoc.data();
-    userEmailEl.textContent = data.email;
-    myReferralEl.textContent = data.referralCode;
-    balanceEl.textContent = data.balance;
+    const userDocRef = doc(db, "users", user.uid);
+    onSnapshot(userDocRef, (docSnap) => {
+      if (docSnap.exists()) {
+        const data = docSnap.data();
+        userEmailEl.textContent = data.email;
+        myReferralEl.textContent = data.referralCode;
+        balanceEl.textContent = data.balance ?? 0;
+      }
+    });
   } else {
     authSection.classList.remove("hidden");
     dashboard.classList.add("hidden");
   }
 });
-
-// Watch Ad
-window.goToAd = async function(adId) {
-  const user = auth.currentUser;
-  const adMessageEl = document.getElementById("adMessage");
-  if (!user) {
-    showMessage(adMessageEl, "Login first!");
-    return;
-  }
-
-  const userRef = db.collection("users").doc(user.uid);
-  const userDoc = await userRef.get();
-  const data = userDoc.data();
-
-  const today = new Date().toDateString();
-  if (data.adsClaimed && data.adsClaimed[adId] === today) {
-    showMessage(adMessageEl, "You already claimed this ad today.");
-    return;
-  }
-
-  showMessage(adMessageEl, "Ad started, wait 60s...", "green");
-
-  setTimeout(async () => {
-    await userRef.update({
-      [`adsClaimed.${adId}`]: today,
-      balance: firebase.firestore.FieldValue.increment(1)
-    });
-    showMessage(adMessageEl, "Ad claimed! +$1", "green");
-  }, 60000);
-};

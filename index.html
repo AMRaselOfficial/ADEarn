@@ -8,15 +8,17 @@
 </head>
 <body>
 
+  <!-- Message / Notification Container -->
+  <div id="message" class="message hidden"></div>
+
   <!-- LOGIN / REGISTER SECTION -->
   <div class="container" id="auth-section">
     <h2>Login / Register</h2>
     <input type="email" id="email" placeholder="Email">
     <input type="password" id="password" placeholder="Password">
-    <input type="text" id="referralCode" placeholder="Friend's Referral Code (optional)">
+    <input type="text" id="referralCode" placeholder="Invitation Code (optional)">
     <button onclick="register()">Register</button>
     <button onclick="login()">Login</button>
-    <p id="authMessage"></p>
   </div>
 
   <!-- DASHBOARD SECTION -->
@@ -24,22 +26,12 @@
     <h2>Welcome <span id="userEmail"></span></h2>
     <p>Your Referral Code: <b id="myReferral"></b></p>
     <p>Your Balance: $<span id="balance"></span></p>
-
-    <!-- Ads Section -->
-    <h3>Watch Ads</h3>
-    <button onclick="goToAd('ad1')">Watch Ad 1</button>
-    <button onclick="goToAd('ad2')">Watch Ad 2</button>
-    <p id="adMessage"></p>
-
+    <button onclick="goToAds()">Go to Ads</button>
     <button onclick="logout()">Logout</button>
   </div>
 
   <!-- Firebase Scripts -->
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
-  <script src="firebase.js"></script>
-  <script src="script.js"></script>
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="script.js"></script>
 </body>
 </html>
