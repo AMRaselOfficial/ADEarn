@@ -2,33 +2,15 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Watch Ad</title>
-  <link rel="stylesheet" href="style.css">
+  <script type="module" src="watch.js"></script>
 </head>
 <body>
-
-  <h2 id="adTitle">Ad Title</h2>
-
-  <!-- Banner Section -->
-  <div id="adBannerContainer">
-    <!-- Example banners -->
-    <div class="banner">
-      <img src="banner1.jpg" alt="Promo 1">
-      <p>Check out our latest offer!</p>
-    </div>
-    <div class="banner">
-      <img src="banner2.jpg" alt="Promo 2">
-      <p>Special discount today!</p>
-    </div>
-    <!-- You can add more banners here -->
+  <h2 id="ad-title">Loading...</h2>
+  <p>Wait <span id="timer">60</span> seconds to earn your reward.</p>
+  <div id="ad-content">
+    <!-- You can place your real ad here -->
+    <iframe id="ad-frame" src="https://amraselofficial.github.io/radio" width="300" height="250"></iframe>
   </div>
-
-  <p>Time remaining: <span id="timer">60</span> seconds</p>
-
-  <div id="message" class="message hidden"></div>
-
-  <script type="module" src="firebase.js"></script>
-  <script type="module" src="watch.js"></script>
 </body>
 </html>
