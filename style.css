@@ -24,7 +24,7 @@ input, button {
   display: none;
 }
 
-#adMessage, #authMessage, #withdrawMessage {
+#adMessage, #authMessage {
   font-size: 14px;
   height: 20px;
 }

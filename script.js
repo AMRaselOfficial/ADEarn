@@ -96,44 +96,6 @@ auth.onAuthStateChanged(async (user) => {
   }
 });
 
-// Withdraw
-window.requestWithdrawal = async function() {
-  const user = auth.currentUser;
-  const amount = parseFloat(document.getElementById("withdrawAmount").value);
-  const messageEl = document.getElementById("withdrawMessage");
-
-  if (!user) {
-    showMessage(messageEl, "You must be logged in!");
-    return;
-  }
-
-  if (!amount || amount < 100) {
-    showMessage(messageEl, "Minimum withdrawal is $100");
-    return;
-  }
-
-  const userRef = db.collection("users").doc(user.uid);
-  const docSnap = await userRef.get();
-  const data = docSnap.data();
-
-  if (data.balance < amount) {
-    showMessage(messageEl, "Insufficient balance!");
-    return;
-  }
-
-  await userRef.update({ balance: data.balance - amount });
-
-  await db.collection("withdrawals").add({
-    userId: user.uid,
-    email: user.email,
-    amount: amount,
-    status: "pending",
-    date: firebase.firestore.FieldValue.serverTimestamp()
-  });
-
-  showMessage(messageEl, `Withdrawal request of $${amount} submitted!`, "green");
-};
-
 // Watch Ad
 window.goToAd = async function(adId) {
   const user = auth.currentUser;
@@ -147,20 +109,18 @@ window.goToAd = async function(adId) {
   const userDoc = await userRef.get();
   const data = userDoc.data();
 
-  // Check daily claim
   const today = new Date().toDateString();
   if (data.adsClaimed && data.adsClaimed[adId] === today) {
     showMessage(adMessageEl, "You already claimed this ad today.");
     return;
   }
 
-  // Show ad page (simple example, wait 60s)
   showMessage(adMessageEl, "Ad started, wait 60s...", "green");
 
   setTimeout(async () => {
     await userRef.update({
       [`adsClaimed.${adId}`]: today,
-      balance: firebase.firestore.FieldValue.increment(1) // reward $1 for example
+      balance: firebase.firestore.FieldValue.increment(1)
     });
     showMessage(adMessageEl, "Ad claimed! +$1", "green");
   }, 60000);

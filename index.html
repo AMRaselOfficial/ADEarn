@@ -31,25 +31,15 @@
     <button onclick="goToAd('ad2')">Watch Ad 2</button>
     <p id="adMessage"></p>
 
-    <!-- Withdrawal Section -->
-    <h3>Withdraw Balance</h3>
-    <p>Minimum withdrawal: $100</p>
-    <input type="number" id="withdrawAmount" placeholder="Enter amount to withdraw">
-    <button onclick="requestWithdrawal()">Withdraw</button>
-    <p id="withdrawMessage"></p>
-
     <button onclick="logout()">Logout</button>
   </div>
 
-  <!-- Firebase v9 compat SDK -->
+  <!-- Firebase Scripts -->
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
-  <!-- Firebase config -->
   <script src="firebase.js"></script>
-
-  <!-- Custom script -->
   <script src="script.js"></script>
 </body>
 </html>
