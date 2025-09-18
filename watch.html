@@ -3,16 +3,21 @@
 <head>
   <meta charset="UTF-8">
   <title>Watch Ad</title>
-  <script type="module" src="watch.js"></script>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <h2 id="ad-title">Loading...</h2>
   <p>Wait <span id="timer">60</span> seconds to earn your reward.</p>
+
   <div id="ad-content">
-    <!-- You can place your real ad here -->
+    <!-- Your banners -->
     <a href="https://broker-qx.pro/sign-up/?lid=1538133"><img src="https://static.quotex.io/files/11_en/300_250.jpg"></a>
     <a href="https://broker-qx.pro/sign-up/?lid=1538133"><img src="https://static.quotex.io/files/9_en/300_250.jpg"></a>
     <a href="https://broker-qx.pro/sign-up/?lid=1538133"><img src="https://static.quotex.io/files/7_en/300_250.jpg"></a>
   </div>
+
+  <!-- Firebase & Watch JS scripts -->
+  <script type="module" src="firebase.js"></script>
+  <script type="module" src="watch.js"></script>
 </body>
 </html>
