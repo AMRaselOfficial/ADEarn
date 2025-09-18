@@ -38,9 +38,9 @@ function showMessage(text, type = "success", duration = 3000) {
 
   messageEl.textContent = text;
 
-  if (type === "error") messageEl.style.backgroundColor = "#f44336";
-  else if (type === "info") messageEl.style.backgroundColor = "#2196f3";
-  else messageEl.style.backgroundColor = "#4caf50";
+  if (type === "error") messageEl.style.backgroundColor = "#f44336"; // red
+  else if (type === "info") messageEl.style.backgroundColor = "#2196f3"; // blue
+  else messageEl.style.backgroundColor = "#4caf50"; // green
 
   messageEl.classList.remove("hidden");
   messageEl.classList.add("show");
