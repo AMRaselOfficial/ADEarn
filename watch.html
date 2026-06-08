@@ -15,6 +15,15 @@
           object-fit: cover;
           z-index: -1;
       }
+      #blocker {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: transparent;
+      z-index: 999999;
+      }
   </style>
 </head>
 <body>
@@ -63,6 +72,20 @@
       video.play().catch(error => {
           console.log("Autoplay was blocked:", error);
       });
+  </script>
+  <div id="blocker"></div>
+  <script>
+  // Block only mouse clicks
+  document.addEventListener("click", function (e) {
+  e.preventDefault();
+  e.stopPropagation();
+  }, true);
+  
+  // Block right click
+  document.addEventListener("contextmenu", e => e.preventDefault());
+  
+  // Block text selection (copy prevention)
+  document.addEventListener("selectstart", e => e.preventDefault());
   </script>
 </body>
 </html>
