@@ -136,7 +136,7 @@ onAuthStateChanged(auth, (user) => {
         const data = docSnap.data();
         userEmailEl.textContent = data.email;
         myReferralEl.textContent = data.referralCode;
-        balanceEl.textContent = data.balance ?? 0;
+        balanceEl.textContent = Number(data.balance ?? 0).toFixed(2);
       }
     });
   } else {

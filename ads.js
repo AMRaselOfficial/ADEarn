@@ -59,7 +59,7 @@ onAuthStateChanged(auth, async (user) => {
 
         const userData = userSnap.data();
 
-        balanceEl.textContent = userData.balance ?? 0;
+        balanceEl.textContent = Number(userData.balance ?? 0).toFixed(2);
 
         // -------------------------
         // Load Ads
