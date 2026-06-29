@@ -29,68 +29,6 @@ body {
   overflow-x: hidden;
 }
 
-/* BACKGROUND */
-.background {
-  position: fixed;
-  inset: 0;
-  overflow: hidden;
-  z-index: -1;
-}
-
-.background span {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(90px);
-  animation: float 15s infinite ease-in-out;
-}
-
-.background span:nth-child(1) {
-  width: 320px;
-  height: 320px;
-  background: #5B5FEF;
-  top: -100px;
-  left: -80px;
-  opacity: .45;
-}
-
-.background span:nth-child(2) {
-  width: 280px;
-  height: 280px;
-  background: #00BFFF;
-  right: -70px;
-  bottom: -80px;
-  animation-delay: 5s;
-  opacity: .35;
-}
-
-.background span:nth-child(3) {
-  width: 240px;
-  height: 240px;
-  background: #A855F7;
-  left: 45%;
-  top: 45%;
-  animation-delay: 8s;
-  opacity: .25;
-}
-
-@keyframes float {
-  0% {
-    transform:
-      translate(0, 0) scale(1);
-  }
-
-  50% {
-    transform:
-      translate(40px, -40px) scale(1.15);
-  }
-
-  100% {
-    transform:
-      translate(0, 0) scale(1);
-  }
-
-}
-
 /* MAIN CARD */
 .container {
   width: 430px;
@@ -527,31 +465,6 @@ input {
 
 .container {
   overflow: hidden;
-}
-
-.container::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: -120%;
-  width: 70%;
-  height: 100%;
-  transform: skewX(-25deg);
-  background: linear-gradient(90deg,
-      transparent,
-      rgba(255, 255, 255, .08),
-      transparent);
-  animation: shine 7s linear infinite;
-}
-
-@keyframes shine {
-  from {
-    left: -120%;
-  }
-
-  to {
-    left: 150%;
-  }
 }
 
 .logo-circle {
