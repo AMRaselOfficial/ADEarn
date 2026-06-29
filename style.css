@@ -776,71 +776,39 @@ background:#16C47F;
 font-weight:600;
 }
 
-/* ===========================
-   Scroll To Top Button
-=========================== */
-
+/* Scroll To Top Button */
 #scrollTopBtn{
-
     position:fixed;
-
     bottom:30px;
-
     right:25px;
-
     width:55px;
-
     height:55px;
-
     border:none;
-
     border-radius:50%;
-
     background:linear-gradient(
         135deg,
         #5B5FEF,
         #7C3AED
     );
-
     color:white;
-
     font-size:20px;
-
     cursor:pointer;
-
     display:flex;
-
     align-items:center;
-
     justify-content:center;
-
     box-shadow:0 15px 35px rgba(91,95,239,.35);
-
     opacity:0;
-
     visibility:hidden;
-
     transform:translateY(20px);
-
     transition:.35s;
-
     z-index:9999;
-
 }
-
 #scrollTopBtn.show{
-
     opacity:1;
-
     visibility:visible;
-
     transform:translateY(0);
-
 }
-
 #scrollTopBtn:hover{
-
     transform:translateY(-5px);
-
     box-shadow:0 20px 40px rgba(91,95,239,.45);
 }
