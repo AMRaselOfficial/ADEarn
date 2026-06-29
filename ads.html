@@ -1,19 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Ads Section</title>
+  <title>ADEarn | Watch Ads</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css">
 </head>
-<body>
-  <div class="container">
-    <h2>Available Ads</h2>
-    <p>Your Balance: $<span id="balance">0</span></p>
-    <div id="adsList"></div>
-    <button onclick="goBack()">Back to Dashboard</button>
-  </div>
 
+<body><center>
+  <div class="background">
+    <span></span>
+    <span></span>
+    <span></span>
+  </div>
+  <div class="container">
+    <div class="logo">
+      <div class="logo-circle">
+        <i class="fa-solid fa-play"></i>
+      </div>
+
+      <h1>Watch Ads</h1>
+      <p>Complete ads and earn real money.</p>
+    </div>
+
+    <div class="dashboard-card">
+      <small>Current Balance</small>
+      <h1>$<span id="balance">0</span></h1>
+    </div>
+    <div class="notice">
+      Minimum Withdrawal: <strong>$100</strong>
+    </div>
+    <button class="logout-button" onclick="goBack()">
+      <i class="fa-solid fa-arrow-left"></i>
+      Back To Dashboard
+    </button>
+    <h2 class="section-title">
+      Available Ads
+    </h2>
+    <div id="adsList">
+      <!-- JS Generates Ads Here -->
+    </div>
+    <div class="footer"></div>
+    <p>New ADs will load every 24 hours. Need help? Contact our support team.</p>
+  </div>
+  <div class="footer">
+    <p>Contact Support</p>
+    <p>Telegram : <b>@YuYanTrade</b></p>
+  </div>
+  <button id="scrollTopBtn" title="Go to Top">
+    <i class="fa-solid fa-arrow-up"></i>
+  </button>
+
+  <script>
+    const scrollBtn = document.getElementById("scrollTopBtn");
+        window.addEventListener("scroll", () => {
+      const scrollTop = window.scrollY;
+      const pageHeight =
+            document.documentElement.scrollHeight -
+            window.innerHeight;
+        if (scrollTop >= pageHeight * 0.25) {
+            scrollBtn.classList.add("show");
+        } else {
+            scrollBtn.classList.remove("show");
+        }
+        });
+        scrollBtn.addEventListener("click", () => {
+        window.scrollTo({
+            top:0,
+            behavior:"smooth"
+      });
+    });
+  </script>
   <script type="module" src="ads.js"></script>
-</body>
+</center></body>
 </html>
